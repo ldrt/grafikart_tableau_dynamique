@@ -1,0 +1,11 @@
+{
+    "name": "app/grafikart_tableau_dynamique",
+    "require": {
+        "symfony/var-dumper": "^5.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    }
+}
