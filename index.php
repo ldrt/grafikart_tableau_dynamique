@@ -1,6 +1,7 @@
 <?php
 
 use App\NumberHelper;
+use App\TableHelper;
 use App\URLHelper;
 
 define('PER_PAGE', 20);
@@ -13,12 +14,23 @@ $pdo = new PDO("sqlite:./products.db", null, null, [
 $query = "SELECT * FROM products";
 $queryCount = "SELECT COUNT(id) as count FROM products";
 $params = [];
+$sortable = ["id", "name", "city", "price", "address"];
 
 // Search by city
 if (!empty($_GET['q'])) {
     $query .= " WHERE city LIKE :city";
     $queryCount .= " WHERE city LIKE :city";
     $params['city'] = '%' . $_GET['q'] . '%';
+}
+
+// Sort
+if (!empty($_GET['sort']) && in_array($_GET['sort'], $sortable)) {
+    $direction = $_GET['dir'] ?? 'asc';
+    if(!in_array($direction, ['asc', 'desc'])) {
+        $direction = 'asc';
+    }
+
+    $query .= " ORDER BY " . $_GET['sort'] . " $direction";
 }
 
 // Pagination
@@ -60,11 +72,11 @@ $pages = ceil($count / PER_PAGE);
     <table class="table table-striped">
         <thead>
             <tr>
-                <th>ID</th>
-                <th>Nom</th>
-                <th>Prix</th>
-                <th>Ville</th>
-                <th>Adresse</th>
+                <th><?= TableHelper::sort('id', 'ID', $_GET) ?></th>
+                <th><?= TableHelper::sort('name', 'Nom', $_GET) ?></th>
+                <th><?= TableHelper::sort('price', 'Prix', $_GET) ?></th>
+                <th><?= TableHelper::sort('city', 'Ville', $_GET) ?></th>
+                <th><?= TableHelper::sort('address', 'Adresse', $_GET) ?></th>
             </tr>
         </thead>
         <tbody>
@@ -81,10 +93,10 @@ $pages = ceil($count / PER_PAGE);
     </table>
 
     <?php if ($pages > 1 && $page > 1) : ?>
-        <a href="?<?= URLHelper::withParam('p', $page - 1) ?>" class="btn btn-primary">Page précedente</a>
+        <a href="?<?= URLHelper::withParam($_GET, 'p', $page - 1) ?>" class="btn btn-primary">Page précedente</a>
     <?php endif ?>
     <?php if ($pages > 1 && $page < $pages) : ?>
-        <a href="?<?= URLHelper::withParam('p', $page + 1)  ?>" class="btn btn-primary">Page suivante</a>
+        <a href="?<?= URLHelper::withParam($_GET, 'p', $page + 1)  ?>" class="btn btn-primary">Page suivante</a>
     <?php endif ?>
 </body>
 </html>
